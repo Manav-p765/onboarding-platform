@@ -41,18 +41,23 @@ export function ClientPortal(p: Props) {
   const pending = useRef(0);
   const topRef = useRef<HTMLDivElement>(null);
 
+  /** Only say "Saved" when nothing is in flight AND nothing is waiting on a debounce timer. */
+  const settle = useCallback(() => {
+    if (pending.current === 0 && timers.current.size === 0) setSaveState("saved");
+  }, []);
+
   const track = useCallback(async (fn: () => Promise<unknown>) => {
     pending.current++;
     setSaveState("saving");
     try {
       await fn();
       pending.current--;
-      if (pending.current === 0) setSaveState("saved");
+      settle();
     } catch {
       pending.current--;
       setSaveState("error");
     }
-  }, []);
+  }, [settle]);
 
   const setAnswer = useCallback(
     (form: string, field: string, value: unknown, delay = 600) => {
@@ -134,7 +139,7 @@ export function ClientPortal(p: Props) {
             <div className="ml-auto"><SaveIndicator state={saveState} /></div>
           </div>
 
-          <div className="mt-8 grid items-end gap-8 lg:grid-cols-[1fr_380px]">
+          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] items-end gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
             <div>
               <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-[2.6rem]">
                 {firstName ? `${firstName}, let's get ${p.client.company} set up.` : `Let's get ${p.client.company} set up.`}
@@ -228,7 +233,7 @@ export function ClientPortal(p: Props) {
                   return res;
                 }}
                 onChange={(field, v, delay) => setAnswer(form.key, field, v, delay)}
-                onFileAdded={(f) => (setFiles((x) => [...x, f]), setSaveState("saved"))}
+                onFileAdded={(f) => (setFiles((x) => [...x, f]), settle())}
                 onFileRemoved={(id) => {
                   setFiles((x) => x.filter((f) => f.id !== id));
                   track(() => removeFileAction(p.token, id));
@@ -788,26 +793,36 @@ function CredCard({ c, onSave, onRemove }: { c: Cred; onSave: (d: Parameters<typ
   const [password, setPassword] = useState("");
   const [notes, setNotes] = useState(c.notes);
   const [show, setShow] = useState(false);
-  const provided = !c.not_applicable && (c.username || c.has_password);
+  // optimistic: the tick box reacts instantly; the server saves in the background
+  const [na, setNa] = useState(c.not_applicable);
+  const provided = !na && (c.username || c.has_password);
   const base = `cred-${c.id}`;
   return (
     <section
       className={`rounded-2xl border bg-surface p-5 transition ${
-        c.not_applicable ? "border-dashed border-line-strong bg-sunken" : provided ? "border-ok/40" : "border-line"
+        na ? "border-dashed border-line-strong bg-sunken" : provided ? "border-ok/40" : "border-line"
       }`}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h3 className={`font-display text-[17px] font-bold ${c.not_applicable ? "text-muted" : ""}`}>{c.platform}</h3>
+        <h3 className={`font-display text-[17px] font-bold ${na ? "text-muted" : ""}`}>{c.platform}</h3>
         {provided && <span className="badge bg-ok/10 text-ok">✓ Saved</span>}
         {!DEFAULT_PLATFORMS.includes(c.platform) && (
           <button className="text-sm text-muted underline-offset-2 hover:text-danger hover:underline" onClick={onRemove}>Remove</button>
         )}
         <label className="ml-auto flex cursor-pointer items-center gap-2 text-sm text-muted">
-          <input type="checkbox" className="size-4 accent-brand" checked={c.not_applicable} onChange={(e) => onSave({ platform: c.platform, not_applicable: e.target.checked })} />
+          <input
+            type="checkbox"
+            className="size-4 accent-brand"
+            checked={na}
+            onChange={(e) => {
+              setNa(e.target.checked);
+              onSave({ platform: c.platform, not_applicable: e.target.checked });
+            }}
+          />
           I don&apos;t have this
         </label>
       </div>
-      {!c.not_applicable && (
+      {!na && (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-muted" htmlFor={`${base}-u`}>Username or email</label>

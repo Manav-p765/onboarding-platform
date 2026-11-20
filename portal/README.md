@@ -14,6 +14,18 @@ npm run dev                  # http://localhost:3000
 The first visit to `/login` shows **First-time setup**, which creates the Super Admin account.
 Email is off by design (no `SMTP_HOST`). Admins share links with the copy-message buttons. Exports: PDF per client, and Excel per client or for all clients.
 
+## Tests
+
+```bash
+npm test            # everything (unit + browser), about 2 minutes
+npm run test:unit   # 31 unit tests: encryption, 2-step codes, locking, change history, lockout
+npm run test:e2e    # 20 browser tests on a real build with an empty database (needs: npx playwright install chromium)
+```
+
+The browser tests cover the full client and admin flows, plus attack attempts: no access without login,
+forged sessions, other clients' files, bad upload types, locked sections, disabled links, lockout and 2-step login.
+On failure, screenshots and traces are written to `test-results/`.
+
 ## Where things live
 
 | What | Where |
