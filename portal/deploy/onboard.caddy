@@ -1,0 +1,19 @@
+# Goes in the CRM's Caddy conf.d directory (mounted read-only, never touched by CRM CI).
+# Requires the CRM Caddyfile to contain:  import /etc/caddy/conf.d/*.caddy
+# and the Caddy container to be attached to the external "edge" network.
+
+onboard.growmysecuritycompany.com {
+	encode zstd gzip
+
+	# uploads up to 200 MB per file
+	request_body {
+		max_size 210MB
+	}
+
+	reverse_proxy onboard-app:3000
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}

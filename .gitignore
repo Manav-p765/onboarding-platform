@@ -1,0 +1,10 @@
+# Client documents / personal data: never commit
+*.pdf
+*.docx
+gmsc-backup-*.html
+
+# test artifacts
+.playwright-mcp/
+
+# portal data (database, uploads, backups)
+portal/data/

@@ -1,0 +1,32 @@
+# Client Onboarding Portal. Lives in /opt/onboard, its own Compose project.
+# Completely separate from the CRM's "aegislead-prod" project.
+#
+#   cd /opt/onboard && docker compose up -d --build
+#
+name: onboard
+
+services:
+  app:
+    build: ./app
+    image: onboard-portal:latest
+    container_name: onboard-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - ./data:/data # SQLite DB, uploads, brand logo, local backups
+    # No "ports:" on purpose. Docker-published ports bypass ufw.
+    # Caddy reaches this container by name over the shared "edge" network.
+    networks: [edge]
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+networks:
+  edge:
+    external: true
+    name: edge # created once: docker network create edge  (CRM's Caddy joins it too)

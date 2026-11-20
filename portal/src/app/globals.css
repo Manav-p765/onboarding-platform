@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/* Design tokens. --brand is overridden per agency (Settings → Brand color). */
+:root {
+  --brand: #0b4a8b;
+  --bg: #eef1f4; /* cool steel paper */
+  --surface: #ffffff;
+  --sunken: #f6f8fa;
+  --text: #10213a; /* deep navy ink */
+  --muted: #4a5568; /* readable secondary text (AA on white and bg) */
+  --faint: #8a94a3;
+  --line: #d5dce4;
+  --line-strong: #b9c3cf;
+  --ok: #1f7a4d;
+  --attn: #c98a0b; /* amber: needs attention */
+  --danger: #b42318;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ok: var(--ok);
+  --color-attn: var(--attn);
+  --color-warn: var(--attn);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-public);
+  --font-display: var(--font-archivo);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-public), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  font-feature-settings: "tnum" 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-archivo), var(--font-public), sans-serif;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand) 55%, white);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_0_rgba(16,33,58,0.04)] sm:p-7;
+}
+
+@utility label {
+  @apply mb-2 flex items-center gap-2 text-[15px] font-semibold text-text;
+}
+
+@utility help {
+  @apply mt-1.5 text-sm leading-snug text-muted;
+}
+
+@utility input {
+  @apply min-h-11 w-full rounded-xl border border-line-strong bg-white px-3.5 py-2.5 text-base text-text outline-none transition placeholder:text-faint hover:border-muted/60 focus:border-brand focus:ring-4 focus:ring-brand/15;
+}
+
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[15px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-brand text-white shadow-[inset_0_-2px_0_rgba(0,0,0,0.18)] hover:brightness-110 active:translate-y-px;
+}
+
+@utility btn-ghost {
+  @apply btn border border-line-strong bg-white text-text hover:border-text/40 hover:bg-sunken;
+}
+
+@utility btn-danger {
+  @apply btn border border-danger/30 bg-white text-danger hover:bg-danger/5;
+}
+
+@utility badge {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-semibold leading-none;
+}
+
+@utility chip {
+  @apply inline-flex min-h-10 items-center gap-1.5 rounded-full border px-4 py-2 text-[15px] font-medium transition;
+}
+
+/* the hero band uses this to keep text readable over any brand color */
+@utility on-brand {
+  color: white;
+  background: var(--brand);
+  background-image: radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.14), transparent 55%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.18));
+}
